@@ -555,7 +555,7 @@ export default function Panel({ params, onChange, onBeforeChange }) {
             const btn = document.querySelector('.ctrl-copy-btn')
             btn.textContent = 'Copied!'
             setTimeout(() => { btn.textContent = 'Copy JSON' }, 1500)
-          })
+          }).catch(() => {})
         }}>Copy JSON</button>
       </div>
     </div>

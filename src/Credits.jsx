@@ -1,8 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 export default function Credits() {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [open])
 
   return (
     <>
@@ -19,7 +26,7 @@ export default function Credits() {
           <div className="credits-modal" onClick={e => e.stopPropagation()}>
             <div className="credits-header">
               <span className="credits-title">Caster</span>
-              <button className="credits-close" onClick={() => setOpen(false)}>x</button>
+              <button className="credits-close" onClick={() => setOpen(false)} aria-label="Close">x</button>
             </div>
             <div className="credits-body">
               <p className="credits-desc">

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 
 // The full CasterScene source — kept in sync with public/CasterScene.jsx.
 const COMPONENT_SOURCE = `/**
- * CasterScene — A configurable 3D shadow and particle component.
+ * CasterScene — A configurable 3D shadow component.
  * Zero external files. Drop into any React project.
  *
  * Usage:
@@ -202,7 +202,7 @@ function buildClaudePrompt(params) {
 npm install three@0.159.0 @react-three/fiber@8.15.12 @react-three/drei@9.106.0 maath
 \`\`\`
 
-Three.js 0.159 is required — newer versions break SoftShadows. The \`three\` package is also used directly for procedural leaf geometry.
+Requires React 16.8+ already in the project. Three.js 0.159 is required — newer versions break SoftShadows.
 
 ## Step 2 — Create \`src/CasterScene.jsx\`
 
@@ -275,7 +275,7 @@ export default function Guide({ params, onOpenChange }) {
     navigator.clipboard.writeText(prompt).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    })
+    }).catch(() => {})
   }
 
   return (
@@ -287,7 +287,7 @@ export default function Guide({ params, onOpenChange }) {
           <div className="guide-modal" onClick={e => e.stopPropagation()}>
             <div className="guide-header">
               <h2>Quick Start</h2>
-              <button className="guide-close" onClick={() => setGuideOpen(false)}>×</button>
+              <button className="guide-close" onClick={() => setGuideOpen(false)} aria-label="Close">×</button>
             </div>
 
             <div className="guide-body">
@@ -314,6 +314,7 @@ export default function Guide({ params, onOpenChange }) {
 
               <section className="guide-section">
                 <h3>1. Install dependencies</h3>
+                <p>Requires React 16.8+ already in your project.</p>
                 <pre><code>npm install three@0.159.0 @react-three/fiber@8.15.12 @react-three/drei@9.106.0 maath</code></pre>
               </section>
 
