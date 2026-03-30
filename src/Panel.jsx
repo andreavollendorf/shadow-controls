@@ -554,9 +554,9 @@ export default function Panel({ params, onChange, onBeforeChange }) {
           navigator.clipboard.writeText(json).then(() => {
             const btn = document.querySelector('.ctrl-copy-btn')
             btn.textContent = 'Copied!'
-            setTimeout(() => { btn.textContent = 'Copy Config' }, 1500)
+            setTimeout(() => { btn.textContent = 'Copy JSON' }, 1500)
           })
-        }}>Copy Config</button>
+        }}>Copy JSON</button>
       </div>
     </div>
   )

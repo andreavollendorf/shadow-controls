@@ -348,7 +348,7 @@ const casterConfig = {
               <section className="guide-section">
                 <h3>4. Change it later</h3>
                 <p>
-                  Come back anytime, tweak the shadow, hit <strong>Copy Config</strong>,
+                  Come back anytime, tweak the shadow, hit <strong>Copy JSON</strong>,
                   and paste over the old JSON. The component stays the same.
                 </p>
               </section>
