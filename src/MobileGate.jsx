@@ -19,7 +19,7 @@ export default function MobileGate() {
         </div>
         <h1 className="mobile-gate-title">Caster</h1>
         <p className="mobile-gate-desc">
-          Caster is a desktop experience for tuning 3D shadows, blinds, and particles in real time. Open this page on a computer to get started.
+          Caster is a desktop only experience for tuning 3D shadows, blinds, and particles in real time.
         </p>
         <a
           href="https://www.andreavollendorf.com/"
