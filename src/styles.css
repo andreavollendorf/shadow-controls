@@ -1,0 +1,1264 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #e8e2da;
+}
+
+canvas {
+  touch-action: none;
+  opacity: 0;
+  animation: fade-in 3s ease 0.5s forwards;
+}
+
+/* Dither noise overlay */
+.dither-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ══════════════════════════════════════
+   Custom control panel
+   ══════════════════════════════════════ */
+
+.panel-root {
+  position: fixed;
+  width: 300px;
+  max-height: calc(100vh - 32px);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: rgba(0, 0, 0, 0.85);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.panel-root.panel-blocked {
+  pointer-events: none;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.9);
+  cursor: grab;
+  touch-action: none;
+}
+
+.panel-header.dragging {
+  cursor: grabbing;
+}
+
+.panel-body {
+  overflow-y: auto;
+  padding: 6px 12px 14px;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+}
+.panel-body::-webkit-scrollbar { width: 4px; }
+.panel-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+}
+
+/* ── Folder ── */
+
+.ctrl-folder {
+  margin-bottom: 2px;
+}
+
+.ctrl-folder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 4px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.ctrl-folder:first-child .ctrl-folder-header {
+  border-top: none;
+}
+
+.ctrl-folder-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 9px;
+  font-weight: 600;
+  cursor: default;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.ctrl-hint-icon:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.ctrl-folder {
+  position: relative;
+}
+
+.ctrl-hint-tooltip {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: dropdown-in 0.15s ease;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.ctrl-hint-line {
+  display: flex;
+  gap: 10px;
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.ctrl-hint-key {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.ctrl-hint-desc {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.ctrl-folder-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.ctrl-folder-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-folder-toggle .ctrl-segment-group {
+  transform: scale(0.85);
+  transform-origin: right center;
+}
+
+.ctrl-chevron {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.25);
+  font-weight: 300;
+}
+
+.ctrl-folder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.ctrl-folder-body > * {
+  animation: folder-item-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.ctrl-folder-body > *:nth-child(1) { animation-delay: 0ms; }
+.ctrl-folder-body > *:nth-child(2) { animation-delay: 30ms; }
+.ctrl-folder-body > *:nth-child(3) { animation-delay: 60ms; }
+.ctrl-folder-body > *:nth-child(4) { animation-delay: 90ms; }
+.ctrl-folder-body > *:nth-child(5) { animation-delay: 120ms; }
+.ctrl-folder-body > *:nth-child(6) { animation-delay: 150ms; }
+.ctrl-folder-body > *:nth-child(7) { animation-delay: 180ms; }
+.ctrl-folder-body > *:nth-child(8) { animation-delay: 210ms; }
+.ctrl-folder-body > *:nth-child(n+9) { animation-delay: 240ms; }
+
+@keyframes folder-item-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctrl-folder-body > * {
+    animation: none;
+  }
+}
+
+/* ── Slider Row — the unified pill ── */
+
+.ctrl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0 14px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  cursor: ew-resize;
+  touch-action: none;
+  overflow: hidden;
+}
+
+/* Fill bar */
+.ctrl-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.ctrl-label {
+  position: relative;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+.ctrl-value {
+  position: relative;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  font-feature-settings: 'tnum' 1;
+  font-family: 'Geist Mono', monospace;
+  pointer-events: none;
+}
+
+.ctrl-row:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.ctrl-row:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Segment Toggle (Off / On) ── */
+
+.ctrl-segment-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.ctrl-segment-btn {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ctrl-segment-btn.active {
+  background: #fff;
+  color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ctrl-segment-btn:hover:not(.active) {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+
+/* ── Wall Color Swatch ── */
+
+.wall-color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+}
+
+.wall-color-swatch-wrap {
+  flex-shrink: 0;
+}
+
+.wall-color-input {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.wall-color-input::-webkit-color-swatch-wrapper { padding: 2px; }
+.wall-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.wall-color-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.wall-color-hex {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+  font-family: 'Geist Mono', monospace;
+}
+
+.wall-color-label {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.particles-off-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.25);
+  text-align: center;
+  padding: 8px 0 2px;
+}
+
+/* ── Particles Weather Station ── */
+
+.particles-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(180, 200, 220, 0.08), rgba(0, 0, 0, 0.02));
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.particles-emoji {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.particles-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 2px;
+}
+
+.particles-desc {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.particles-type-bar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.particles-type-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 0;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.particles-type-btn:hover:not(.active) {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.particles-type-btn.active {
+  background: #fff;
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Shadow Appearance + Quality ── */
+
+/* (uses shared .ctrl-group-label) */
+
+.shadow-icon-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.shadow-icon-row .ctrl-row {
+  flex: 1;
+}
+
+.shadow-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-swatch--opacity {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.03));
+}
+
+.shadow-swatch--soft {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.shadow-swatch-blur-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  filter: blur(4px);
+}
+
+.shadow-swatch--focus {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.shadow-swatch-ring-outer {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-swatch-ring-inner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shadow-swatch-ring-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Light XY Pad + Z ── */
+
+.light-pad-wrap {
+  display: flex;
+  gap: 10px;
+}
+
+.light-pad {
+  flex: 1;
+  aspect-ratio: 1;
+  background: linear-gradient(180deg, rgba(255, 200, 100, 0.04), rgba(0, 0, 0, 0.02));
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.light-pad:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light-pad.active {
+  border-color: rgba(255, 190, 60, 0.3);
+}
+
+.light-pad-grid-h {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.light-pad-grid-v {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.light-pad-axis-label {
+  position: absolute;
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.light-pad-readout {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.3);
+  font-family: 'Geist Mono', monospace;
+  pointer-events: none;
+}
+
+.light-pad-sun {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(255, 190, 60);
+  box-shadow: 0 0 12px rgba(255, 190, 60, 0.5), 0 0 0 3px rgba(255, 190, 60, 0.15);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.light-pad.active .light-pad-sun {
+  box-shadow: 0 0 18px rgba(255, 190, 60, 0.6), 0 0 0 4px rgba(255, 190, 60, 0.2);
+}
+
+/* Z vertical slider */
+.light-z {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, rgba(255, 200, 100, 0.04), rgba(0, 0, 0, 0.02));
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 10px 0;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: border-color 0.15s ease;
+}
+
+.light-z:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light-z.active {
+  border-color: rgba(255, 190, 60, 0.3);
+}
+
+.light-z-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.light-z-track {
+  flex: 1;
+  width: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  position: relative;
+}
+
+.light-z-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 190, 60, 0.35);
+  border-radius: 2px;
+  transition: height 0.05s ease;
+}
+
+.light-z-thumb {
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgb(255, 190, 60);
+  box-shadow: 0 0 8px rgba(255, 190, 60, 0.4);
+  transform: translate(-50%, 50%);
+  pointer-events: none;
+}
+
+.light-z.active .light-z-thumb {
+  box-shadow: 0 0 14px rgba(255, 190, 60, 0.5);
+}
+
+.light-z-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.7);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* ── Blinds Visual Manipulator ── */
+
+.blinds-viz {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  padding: 20px 16px 16px;
+  margin-bottom: 8px;
+}
+
+.blinds-slats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+  min-height: 70px;
+  justify-content: center;
+}
+
+.blinds-slats.vertical {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+}
+
+.blinds-slat {
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.blinds-annotations {
+  display: flex;
+  justify-content: space-between;
+}
+
+.blinds-scrub-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.blinds-scrub-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.blinds-scrub-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(100, 140, 210, 0.85);
+  font-family: 'Geist Mono', monospace;
+  transition: color 0.15s ease;
+  border-bottom: 1px dashed transparent;
+}
+
+.blinds-scrub-value:hover .blinds-scrub-num {
+  color: rgb(60, 120, 240);
+  border-bottom-color: rgba(60, 120, 240, 0.3);
+}
+
+.blinds-scrub-value:hover .blinds-scrub-label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.blinds-scrub-num.active {
+  color: rgb(40, 100, 240);
+  border-bottom-color: transparent;
+}
+
+/* Orientation toggle */
+.blinds-orientation {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.blinds-orientation-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background: transparent;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.blinds-orientation-btn:hover {
+  color: rgba(0, 0, 0, 0.55);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.blinds-orientation-btn.active {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ── Shared sub-group label ── */
+.ctrl-group-label {
+  padding: 10px 4px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Grid layout for compact cells */
+
+.ctrl-grid {
+  display: flex;
+  gap: 6px;
+}
+
+.ctrl-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctrl-cell-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.ctrl-cell:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.ctrl-cell.active {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.ctrl-cell-label {
+  position: relative;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.ctrl-cell-value {
+  position: relative;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Breathe strip (V5 style) */
+.blinds-breathe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px 10px 14px;
+  background: linear-gradient(135deg, rgba(100, 140, 210, 0.06), rgba(100, 140, 210, 0.02));
+  border-radius: 10px;
+  border: 1px solid rgba(100, 140, 210, 0.1);
+  margin-top: 8px;
+}
+
+.blinds-breathe-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.blinds-breathe-wave {
+  color: rgba(100, 140, 210, 0.5);
+  flex-shrink: 0;
+}
+
+.blinds-breathe-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.blinds-breathe-values {
+  display: flex;
+  gap: 6px;
+}
+
+.blinds-breathe-values .ctrl-cell {
+  width: 52px;
+  height: 40px;
+  flex: none;
+  background: rgba(100, 140, 210, 0.06);
+}
+
+.blinds-breathe-values .ctrl-cell:hover {
+  background: rgba(100, 140, 210, 0.12);
+}
+
+.blinds-breathe-values .ctrl-cell.active {
+  background: rgba(100, 140, 210, 0.16);
+}
+
+.blinds-breathe-values .ctrl-cell-label {
+  font-size: 8px;
+}
+
+.blinds-breathe-values .ctrl-cell-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(100, 140, 210, 0.8);
+}
+
+/* ── Copy button ── */
+
+.panel-footer {
+  padding: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.ctrl-copy-btn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  color: rgba(0, 0, 0, 0.45);
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.ctrl-copy-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.ctrl-copy-btn:active {
+  transform: scale(0.98);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ══════════════════════════════════════
+   Quick Start Guide
+   ══════════════════════════════════════ */
+
+.guide-trigger {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+.guide-trigger:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: guide-fade 0.2s ease;
+}
+
+@keyframes guide-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.guide-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.2);
+  animation: guide-slide 0.25s ease;
+}
+
+@keyframes guide-slide {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.guide-header h2 {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.guide-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.guide-close:hover { color: rgba(0, 0, 0, 0.6); }
+
+.guide-body {
+  padding: 20px 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+}
+.guide-body::-webkit-scrollbar { width: 4px; }
+.guide-body::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.08); border-radius: 4px; }
+
+.guide-section {
+  margin-bottom: 24px;
+}
+.guide-section:last-child {
+  margin-bottom: 0;
+}
+
+.guide-section h3 {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 8px;
+}
+
+.guide-section p {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.55);
+  margin-bottom: 6px;
+}
+
+.guide-section pre {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin-top: 6px;
+}
+
+.guide-section code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.7);
+  white-space: pre;
+}
+
+/* Claude Code card */
+.guide-claude-section {
+  margin-bottom: 0 !important;
+}
+
+.guide-claude-card {
+  background: #f7f7f7;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-claude-header h3 {
+  margin-bottom: 4px;
+}
+
+.guide-claude-header p {
+  margin: 0;
+}
+
+.guide-claude-badge {
+  display: inline-block;
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(40, 100, 240);
+  background: rgba(40, 100, 240, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.guide-claude-btn {
+  width: 100%;
+  padding: 11px;
+  background: rgb(40, 100, 240);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(40, 100, 240, 0.25);
+}
+.guide-claude-btn:hover {
+  background: rgb(30, 85, 220);
+}
+.guide-claude-btn:active {
+  transform: scale(0.98);
+}
+
+.guide-claude-note {
+  font-size: 11px !important;
+  color: rgba(0, 0, 0, 0.35) !important;
+  text-align: center;
+  margin: 0 !important;
+}
+
+/* Divider */
+.guide-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+.guide-divider::before,
+.guide-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.guide-divider span {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.guide-downloads {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.guide-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.guide-download-btn:hover {
+  background: #eee;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.guide-download-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgb(40, 100, 240);
+  color: #fff;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.guide-download-hint {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.guide-credits ul {
+  list-style: none;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-credits li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guide-credits li a {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgb(40, 100, 240);
+  text-decoration: none;
+}
+.guide-credits li a:hover {
+  text-decoration: underline;
+}
+
+.guide-credits li span {
+  font-family: 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 11.5px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.guide-note {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.4) !important;
+  margin-top: 12px;
+}
