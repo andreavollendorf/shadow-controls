@@ -486,7 +486,7 @@ export default function Panel({ params, onChange, onBeforeChange }) {
         onPointerUp={handleHeaderUp}
         onPointerCancel={handleHeaderUp}
       >
-        <span>Shadow Controls</span>
+        <span>Caster</span>
         <Guide params={params} onOpenChange={setGuideOpen} />
       </div>
       <div className="panel-body">

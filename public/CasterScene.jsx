@@ -1,10 +1,10 @@
 /**
- * ShadowScene — A configurable 3D shadow component.
+ * CasterScene — A configurable 3D shadow component.
  * Zero external files. Drop into any React project.
  *
  * Usage:
- *   import ShadowScene from './ShadowScene'
- *   <ShadowScene config={{ ...pastedJSON }} />
+ *   import CasterScene from './CasterScene'
+ *   <CasterScene config={{ ...pastedJSON }} />
  *
  * Tune your config at: https://shadow-controls.vercel.app
  *
@@ -35,7 +35,7 @@ const DEFAULTS = {
   camFov: 75, camMouse: 0.5, camDamping: 0.5, camDistance: 5,
 }
 
-export default function ShadowScene({ config = {}, style = {}, className = '' }) {
+export default function CasterScene({ config = {}, style = {}, className = '' }) {
   const p = { ...DEFAULTS, ...config }
   return (
     <Canvas dpr={[1, 1.5]} shadows className={className} style={{ background: p.wallColor, ...style }}>

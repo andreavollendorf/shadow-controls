@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-// The full ShadowScene source — kept in sync with public/ShadowScene.jsx.
+// The full CasterScene source — kept in sync with public/CasterScene.jsx.
 const COMPONENT_SOURCE = `/**
- * ShadowScene — A configurable 3D shadow component.
+ * CasterScene — A configurable 3D shadow and particle component.
  * Zero external files. Drop into any React project.
  *
  * Usage:
- *   import ShadowScene from './ShadowScene'
- *   <ShadowScene config={{ ...pastedJSON }} />
+ *   import CasterScene from './CasterScene'
+ *   <CasterScene config={{ ...pastedJSON }} />
  *
  * Tune your config at: https://shadow-controls.vercel.app
  *
@@ -39,7 +39,7 @@ const DEFAULTS = {
   camFov: 75, camMouse: 0.5, camDamping: 0.5, camDistance: 5,
 }
 
-export default function ShadowScene({ config = {}, style = {}, className = '' }) {
+export default function CasterScene({ config = {}, style = {}, className = '' }) {
   const p = { ...DEFAULTS, ...config }
   return (
     <Canvas dpr={[1, 1.5]} shadows className={className} style={{ background: p.wallColor, ...style }}>
@@ -194,7 +194,7 @@ function Rain({ speed, particleScale, pos, count, dropSize, dropLength, wind }) 
 `
 
 function buildClaudePrompt(params) {
-  return `Install the ShadowScene shadow component into my React project. Do these steps in order:
+  return `Install the CasterScene component into my React project. Do these steps in order:
 
 ## Step 1 — Install dependencies (pinned versions required)
 
@@ -204,7 +204,7 @@ npm install three@0.159.0 @react-three/fiber@8.15.12 @react-three/drei@9.106.0 m
 
 Three.js 0.159 is required — newer versions break SoftShadows. The \`three\` package is also used directly for procedural leaf geometry.
 
-## Step 2 — Create \`src/ShadowScene.jsx\`
+## Step 2 — Create \`src/CasterScene.jsx\`
 
 Write this file exactly:
 
@@ -215,19 +215,19 @@ ${COMPONENT_SOURCE}
 ## Step 3 — Use it with my config
 
 \`\`\`jsx
-import ShadowScene from './ShadowScene'
+import CasterScene from './CasterScene'
 
-const shadowConfig = ${JSON.stringify(params, null, 2)}
+const casterConfig = ${JSON.stringify(params, null, 2)}
 
 // Full-page background shadow:
-<ShadowScene
-  config={shadowConfig}
+<CasterScene
+  config={casterConfig}
   style={{ position: 'fixed', inset: 0, zIndex: -1 }}
 />
 
 // Or inside a container:
 <div style={{ width: '100%', height: '400px' }}>
-  <ShadowScene config={shadowConfig} />
+  <CasterScene config={casterConfig} />
 </div>
 \`\`\`
 
@@ -323,9 +323,9 @@ export default function Guide({ params, onOpenChange }) {
                   Download the component file and drop it into your <code>src/</code> folder. That's it — no other files needed.
                 </p>
                 <div className="guide-downloads">
-                  <button className="guide-download-btn" onClick={() => downloadBlob(COMPONENT_SOURCE, 'ShadowScene.jsx')}>
+                  <button className="guide-download-btn" onClick={() => downloadBlob(COMPONENT_SOURCE, 'CasterScene.jsx')}>
                     <span className="guide-download-icon">↓</span>
-                    ShadowScene.jsx
+                    CasterScene.jsx
                     <span className="guide-download-hint">→ src/</span>
                   </button>
                 </div>
@@ -333,14 +333,14 @@ export default function Guide({ params, onOpenChange }) {
 
               <section className="guide-section">
                 <h3>3. Use it</h3>
-                <pre><code>{`import ShadowScene from './ShadowScene'
+                <pre><code>{`import CasterScene from './CasterScene'
 
-const shadowConfig = {
+const casterConfig = {
   // Paste your config from the tuner
 }
 
-<ShadowScene
-  config={shadowConfig}
+<CasterScene
+  config={casterConfig}
   style={{ position: 'fixed', inset: 0, zIndex: -1 }}
 />`}</code></pre>
               </section>
@@ -353,34 +353,6 @@ const shadowConfig = {
                 </p>
               </section>
 
-              <section className="guide-section guide-credits">
-                <h3>Credits & Attribution</h3>
-                <p>
-                  Built by{' '}
-                  <a href="https://www.andreavollendorf.com/" target="_blank" rel="noopener noreferrer">Andrea Vollendorf</a>
-                  {' '}as a configurable wrapper around techniques published by:
-                </p>
-                <ul>
-                  <li>
-                    <a href="https://basement.studio/post/creating-daylight-or-the-shadows" target="_blank" rel="noopener noreferrer">
-                      Basement Studio — "Creating Daylight, or The Shadows"
-                    </a>
-                    <span>The rendering technique behind Daylight Computer's shadow effect</span>
-                  </li>
-                  <li>
-                    <a href="https://codesandbox.io/p/sandbox/focused-dirac-3w6cxs" target="_blank" rel="noopener noreferrer">
-                      @0xca0a (Paul Henschel) — CodeSandbox Demo
-                    </a>
-                    <span>The React Three Fiber implementation this component is based on</span>
-                  </li>
-                  <li>
-                    <a href="https://joshpuckett.me/dialkit" target="_blank" rel="noopener noreferrer">
-                      Josh Puckett — DialKit
-                    </a>
-                    <span>Inspiration for the side panel fine-tuning controls</span>
-                  </li>
-                </ul>
-              </section>
             </div>
           </div>
         </div>,

@@ -1,4 +1,5 @@
 import { useRef, useMemo, useState, useCallback, useEffect } from 'react'
+import Credits from './Credits'
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Instance, Instances, SoftShadows, PerspectiveCamera } from '@react-three/drei'
@@ -105,6 +106,7 @@ export default function App() {
 
         <SoftShadows size={p.softSize} focus={p.softFocus} samples={p.softSamples} />
       </Canvas>
+      <Credits />
     </>
   )
 }
