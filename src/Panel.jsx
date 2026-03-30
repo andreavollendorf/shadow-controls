@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Guide from './Guide'
 
 // ── Slider Row ──
@@ -33,7 +33,7 @@ function Slider({ label, value, min, max, step, onChange, onDragStart }) {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <div className="ctrl-fill" style={{ width: pct + '%' }} />
+      <div className="ctrl-fill" style={{ transform: `scaleX(${pct / 100})` }} />
       <span className="ctrl-label">{label}</span>
       <span className="ctrl-value">{Number(value.toFixed(2))}</span>
     </div>
@@ -154,7 +154,7 @@ function CompactCell({ label, value, min, max, step, onChange, onDragStart }) {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <div className="ctrl-cell-fill" style={{ width: `${pct}%` }} />
+      <div className="ctrl-cell-fill" style={{ transform: `scaleX(${pct / 100})` }} />
       <span className="ctrl-cell-label">{label}</span>
       <span className="ctrl-cell-value">{Number(value.toFixed(2))}</span>
     </div>

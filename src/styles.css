@@ -96,6 +96,7 @@ canvas {
 
 .ctrl-folder {
   margin-bottom: 2px;
+  position: relative;
 }
 
 .ctrl-folder-header {
@@ -137,10 +138,6 @@ canvas {
 .ctrl-hint-icon:hover {
   background: rgba(0, 0, 0, 0.1);
   color: rgba(0, 0, 0, 0.6);
-}
-
-.ctrl-folder {
-  position: relative;
 }
 
 .ctrl-hint-tooltip {
@@ -261,9 +258,12 @@ canvas {
   top: 0;
   left: 0;
   bottom: 0;
+  width: 100%;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   pointer-events: none;
+  transform-origin: left;
+  will-change: transform;
 }
 
 .ctrl-label {
@@ -312,7 +312,7 @@ canvas {
   background: transparent;
   color: rgba(0, 0, 0, 0.35);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease-out, color 0.15s ease-out, box-shadow 0.15s ease-out;
 }
 
 .ctrl-segment-btn.active {
@@ -376,14 +376,6 @@ canvas {
   color: rgba(0, 0, 0, 0.3);
 }
 
-.particles-off-hint {
-  font-size: 11px;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.25);
-  text-align: center;
-  padding: 8px 0 2px;
-}
-
 /* ── Particles Weather Station ── */
 
 .particles-display {
@@ -393,7 +385,6 @@ canvas {
   background: linear-gradient(180deg, rgba(180, 200, 220, 0.08), rgba(0, 0, 0, 0.02));
   border-radius: 14px;
   padding: 20px;
-  margin-bottom: 10px;
 }
 
 .particles-emoji {
@@ -746,6 +737,7 @@ canvas {
   font-weight: 700;
   color: rgba(100, 140, 210, 0.85);
   font-family: 'Geist Mono', monospace;
+  font-variant-numeric: tabular-nums;
   transition: color 0.15s ease;
   border-bottom: 1px dashed transparent;
 }
@@ -840,9 +832,12 @@ canvas {
   top: 0;
   left: 0;
   bottom: 0;
+  width: 100%;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   pointer-events: none;
+  transform-origin: left;
+  will-change: transform;
 }
 
 .ctrl-cell:hover {
@@ -869,6 +864,7 @@ canvas {
   font-weight: 600;
   color: rgba(0, 0, 0, 0.85);
   font-family: 'Geist Mono', monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Breathe strip (V5 style) */
